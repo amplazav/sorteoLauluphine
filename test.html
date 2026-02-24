@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Animación</title>
+    <style>
+        body {
+            background: #1a0033;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .test-container {
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            margin: 0 auto;
+        }
+        
+        .roulette-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 3px solid rgba(255, 105, 180, 0.5);
+            background: linear-gradient(135deg, rgba(255, 105, 180, 0.1) 0%, rgba(145, 70, 255, 0.1) 100%);
+            box-shadow: inset 0 0 20px rgba(255, 105, 180, 0.2), 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        .roulette-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: rgba(255, 20, 147, 0.2);
+            border-top: 3px solid #ff1493;
+            border-bottom: 3px solid #ff1493;
+            transform: translateY(-50%);
+            z-index: 10;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(255, 20, 147, 0.4);
+        }
+        
+        .roulette-list {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+        }
+        
+        .roulette-item {
+            height: 80px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid rgba(255, 105, 180, 0.2);
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #ffb6d9;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        
+        .roulette-item-icon {
+            font-size: 1.5em;
+        }
+        
+        .roulette-item-name {
+            flex: 1;
+            text-align: center;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #ff1493 0%, #ff69b4 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(255, 20, 147, 0.4);
+        }
+        
+        button:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 style="text-align: center; color: #ff1493;">🎀 Test de Animación 🎀</h1>
+        
+        <div class="wheel-container">
+            <div class="roulette-wrapper">
+                <div class="roulette-list" id="rouletteList"></div>
+            </div>
+        </div>
+        
+        <button onclick="testSpin()">Girar Ruleta</button>
+    </div>
+
+    <script>
+        const names = ['LuluSuperfan', 'User2', 'User3', 'User4', 'User5', 'User6', 'User7', 'User8', 'User9', 'User10'];
+        const icons = ['💎', '👤', '⭐', '👤', '💎', '⭐', '👤', '💎', '⭐', '👤'];
+        
+        function drawRoulette() {
+            const rouletteList = document.getElementById('rouletteList');
+            rouletteList.innerHTML = '';
+            
+            // Duplicar items para efecto infinito
+            const extended = [
+                ...names.slice(-2),
+                ...names,
+                ...names.slice(0, 2)
+            ];
+            
+            extended.forEach((name, i) => {
+                const item = document.createElement('div');
+                item.className = 'roulette-item';
+                const icon = icons[i % icons.length];
+                item.innerHTML = `<span class="roulette-item-icon">${icon}</span><span class="roulette-item-name">${name}</span>`;
+                rouletteList.appendChild(item);
+            });
+        }
+        
+        function testSpin() {
+            const rouletteList = document.getElementById('rouletteList');
+            const itemHeight = 80;
+            const finalIndex = Math.floor(Math.random() * names.length);
+            const totalPixels = (8 + finalIndex) * itemHeight;
+            
+            console.log('Girando hasta pixel:', totalPixels, 'Índice final:', finalIndex);
+            
+            animateRoulette(0, totalPixels, 3000, rouletteList);
+        }
+        
+        function animateRoulette(startPixels, endPixels, duration, rouletteList) {
+            const startTime = Date.now();
+            const itemHeight = 80;
+            const startPosition = (2 * itemHeight); // 160px
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing: ease-out cubic
+                const easeProgress = 1 - Math.pow(1 - progress, 3);
+                
+                const currentPixels = startPixels + (endPixels * easeProgress);
+                const newPosition = startPosition - currentPixels;
+                
+                console.log('Progress:', progress.toFixed(2), 'Current Pixels:', currentPixels, 'New Position:', newPosition);
+                rouletteList.style.transform = `translateY(${newPosition}px)`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    const finalPosition = startPosition - endPixels;
+                    rouletteList.style.transform = `translateY(${finalPosition}px)`;
+                    console.log('Animación terminada. Final Position:', finalPosition);
+                }
+            }
+            
+            animate();
+        }
+        
+        // Inicializar
+        drawRoulette();
+    </script>
+</body>
+</html>
